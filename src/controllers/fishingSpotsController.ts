@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
-import * as fishingSpotsService from "../services/fishingSpotsService";
+import * as fishingSpotService from "../services/fishingSpotsService";
 
-export const getFishingSpots = async (
+export const getAllFishingSpots = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const fishingSpots = await fishingSpotsService.getAllFishingSpots();
-  res.status(200).json(fishingSpots);
+  try {
+    const spots = await fishingSpotService.getAllFishingSpots();
+    res.json(spots);
+  } catch (error) {
+    console.error("Error fetching fishing spots:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 export const getFishingSpotById = async (
@@ -14,11 +19,17 @@ export const getFishingSpotById = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
-  const fishingSpot = await fishingSpotsService.getFishingSpotById(id);
-  if (fishingSpot) {
-    res.status(200).json(fishingSpot);
-  } else {
-    res.status(404).send("Fishing spot not found");
+
+  try {
+    const spot = await fishingSpotService.getFishingSpotById(id);
+    if (!spot) {
+      res.status(404).json({ message: "Fishing spot not found" });
+      return;
+    }
+    res.json(spot);
+  } catch (error) {
+    console.error("Error fetching fishing spot:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -26,11 +37,15 @@ export const createFishingSpot = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const newFishingSpot = req.body;
-  const createdFishingSpot = await fishingSpotsService.createFishingSpot(
-    newFishingSpot
-  );
-  res.status(201).json(createdFishingSpot);
+  const { name, location } = req.body;
+
+  try {
+    const newSpot = await fishingSpotService.createFishingSpot(name, location);
+    res.status(201).json(newSpot);
+  } catch (error) {
+    console.error("Error creating fishing spot:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 export const updateFishingSpot = async (
@@ -38,15 +53,22 @@ export const updateFishingSpot = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
-  const updatedFishingSpot = req.body;
-  const result = await fishingSpotsService.updateFishingSpot(
-    id,
-    updatedFishingSpot
-  );
-  if (result) {
-    res.status(200).json(result);
-  } else {
-    res.status(404).send("Fishing spot not found");
+  const { name, location } = req.body;
+
+  try {
+    const updatedSpot = await fishingSpotService.updateFishingSpot(
+      id,
+      name,
+      location
+    );
+    if (!updatedSpot) {
+      res.status(404).json({ message: "Fishing spot not found" });
+      return;
+    }
+    res.json(updatedSpot);
+  } catch (error) {
+    console.error("Error updating fishing spot:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -55,10 +77,12 @@ export const deleteFishingSpot = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
-  const result = await fishingSpotsService.deleteFishingSpot(id);
-  if (result) {
-    res.status(204).send();
-  } else {
-    res.status(404).send("Fishing spot not found");
+
+  try {
+    await fishingSpotService.deleteFishingSpot(id);
+    res.status(204).end();
+  } catch (error) {
+    console.error("Error deleting fishing spot:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };

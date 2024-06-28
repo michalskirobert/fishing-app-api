@@ -1,46 +1,56 @@
-import { FishingSpot } from "../models/fishingSpot";
+import FishingSpot, { IFishingSpot } from "../models/FishingSpot";
 
-// Dummy data for demonstration purposes
-let fishingSpots: FishingSpot[] = [
-  { id: "1", name: "Spot 1", location: "Lake 1" },
-  { id: "2", name: "Spot 2", location: "River 1" },
-];
-
-export const getAllFishingSpots = async (): Promise<FishingSpot[]> => {
-  return fishingSpots;
+export const getAllFishingSpots = async (): Promise<IFishingSpot[]> => {
+  try {
+    return await FishingSpot.find();
+  } catch (error) {
+    throw new Error("Error fetching fishing spots");
+  }
 };
 
 export const getFishingSpotById = async (
   id: string
-): Promise<FishingSpot | null> => {
-  const fishingSpot = fishingSpots.find((spot) => spot.id === id);
-  return fishingSpot || null;
+): Promise<IFishingSpot | null> => {
+  try {
+    return await FishingSpot.findById(id);
+  } catch (error) {
+    throw new Error("Error fetching fishing spot");
+  }
 };
 
 export const createFishingSpot = async (
-  newFishingSpot: FishingSpot
-): Promise<FishingSpot> => {
-  fishingSpots.push(newFishingSpot);
-  return newFishingSpot;
+  name: string,
+  location: string
+): Promise<IFishingSpot> => {
+  try {
+    const newSpot = new FishingSpot({ name, location });
+    return await newSpot.save();
+  } catch (error) {
+    throw new Error("Error creating fishing spot");
+  }
 };
 
 export const updateFishingSpot = async (
   id: string,
-  updatedFishingSpot: Partial<FishingSpot>
-): Promise<FishingSpot | null> => {
-  const index = fishingSpots.findIndex((spot) => spot.id === id);
-  if (index === -1) {
-    return null;
+  name: string,
+  location: string
+): Promise<IFishingSpot | null> => {
+  try {
+    const updatedSpot = await FishingSpot.findByIdAndUpdate(
+      id,
+      { name, location },
+      { new: true }
+    );
+    return updatedSpot;
+  } catch (error) {
+    throw new Error("Error updating fishing spot");
   }
-  fishingSpots[index] = { ...fishingSpots[index], ...updatedFishingSpot };
-  return fishingSpots[index];
 };
 
-export const deleteFishingSpot = async (id: string): Promise<boolean> => {
-  const index = fishingSpots.findIndex((spot) => spot.id === id);
-  if (index === -1) {
-    return false;
+export const deleteFishingSpot = async (id: string): Promise<void> => {
+  try {
+    await FishingSpot.findByIdAndDelete(id);
+  } catch (error) {
+    throw new Error("Error deleting fishing spot");
   }
-  fishingSpots.splice(index, 1);
-  return true;
 };

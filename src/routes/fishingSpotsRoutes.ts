@@ -1,19 +1,12 @@
-import { Router } from "express";
-import {
-  getFishingSpots,
-  getFishingSpotById,
-  createFishingSpot,
-  updateFishingSpot,
-  deleteFishingSpot,
-} from "../controllers/fishingSpotsController";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import express from "express";
+import * as fishingSpotController from "../controllers/fishingSpotsController";
 
-const router: Router = Router();
+const router = express.Router();
 
-router.get("/", authMiddleware, getFishingSpots);
-router.get("/:id", authMiddleware, getFishingSpotById);
-router.post("/", authMiddleware, createFishingSpot);
-router.put("/:id", authMiddleware, updateFishingSpot);
-router.delete("/:id", authMiddleware, deleteFishingSpot);
+router.get("/fishing-spots", fishingSpotController.getAllFishingSpots);
+router.get("/fishing-spots/:id", fishingSpotController.getFishingSpotById);
+router.post("/fishing-spots", fishingSpotController.createFishingSpot);
+router.put("/fishing-spots/:id", fishingSpotController.updateFishingSpot);
+router.delete("/fishing-spots/:id", fishingSpotController.deleteFishingSpot);
 
 export default router;
