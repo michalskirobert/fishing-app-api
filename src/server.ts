@@ -6,7 +6,7 @@ import { authMiddleware } from "@middlewares/authMiddleware";
 import env from "./config/env";
 
 const app = express();
-const port = env.PORT || 3000;
+const port = env.PORT;
 
 app.use(express.json());
 
