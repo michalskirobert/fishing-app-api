@@ -1,12 +1,18 @@
 import express from "express";
-import * as fishingSpotController from "../controllers/fishingSpotsController";
+import {
+  getAllFishingSpots,
+  // getFishingSpotById,
+  // createFishingSpot,
+  // updateFishingSpot,
+  // deleteFishingSpot,
+} from "@controllers/fishingSpotsController";
 
 const router = express.Router();
 
-router.get("/fishing-spots", fishingSpotController.getAllFishingSpots);
-router.get("/fishing-spots/:id", fishingSpotController.getFishingSpotById);
-router.post("/fishing-spots", fishingSpotController.createFishingSpot);
-router.put("/fishing-spots/:id", fishingSpotController.updateFishingSpot);
-router.delete("/fishing-spots/:id", fishingSpotController.deleteFishingSpot);
+router.get("/", getAllFishingSpots);
+// router.get("/:id", getFishingSpotById);
+// router.post("/", createFishingSpot);
+// router.put("/:id", updateFishingSpot);
+// router.delete("/:id", deleteFishingSpot);
 
 export default router;

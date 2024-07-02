@@ -40,7 +40,12 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       res.status(500).json({ message: "User creation failed" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Ogólny błąd serwera" });
+    res
+      .status(500)
+      .json({
+        message:
+          "Ogólny błąd serwera, proszę skontaktować się z administratorem",
+      });
   }
 };
 
@@ -72,6 +77,11 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({ token });
   } catch (error) {
-    res.status(500).json({ message: "Ogólny błąd serwera" });
+    res
+      .status(500)
+      .json({
+        message:
+          "Ogólny błąd serwera, proszę skontaktować się z administratorem",
+      });
   }
 };

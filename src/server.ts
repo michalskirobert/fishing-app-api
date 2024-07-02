@@ -1,21 +1,17 @@
 import express from "express";
-import fishingSpotsRoutes from "./routes/fishingSpotsRoutes";
+import fishingSpotsRoutes from "@routes/fishingSpotsRoutes";
+import authRoutes from "@routes/authRoutes";
+import { authMiddleware } from "@middlewares/authMiddleware";
 
-import { MongoClient, ServerApiVersion } from "mongodb";
-
-import dotenv from "dotenv";
-import { connectDatabase } from "./config/database";
-
-dotenv.config();
+import env from "./config/env";
 
 const app = express();
-const port = process.env.PORT || 3000;
-
-connectDatabase();
+const port = env.PORT || 3000;
 
 app.use(express.json());
 
-app.use("/api/fishing-spots", fishingSpotsRoutes);
+app.use("/api/fishing-spots", authMiddleware, fishingSpotsRoutes);
+app.use("/api/authentication", authRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
