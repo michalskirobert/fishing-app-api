@@ -17,7 +17,7 @@
       "@config/*": ["src/config/*"],
       "@controllers/*": ["src/controllers/*"],
       "@middlewares/*": ["src/middlewares/*"],
-      "@types/*": ["src/types/*"],
+      "@namespace/*": ["src/types/*"],
       "@routes/*": ["src/routes/*"],
       "@utils/*": ["src/utils/*"]
     }

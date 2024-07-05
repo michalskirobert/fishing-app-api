@@ -48,8 +48,6 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
 
     const user = await usersCollection?.findOne({ email });
 
-    console.log(user);
-
     if (!user) {
       res.status(400).json({ message: "Invalid email or password" });
       return;
@@ -62,7 +60,7 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user._id, email: user.email },
       env.JWT_SECRET,
       {
@@ -70,7 +68,7 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
       }
     );
 
-    res.status(200).json({ token });
+    res.status(200).json({ ...user, accessToken, tokenExprTime: 60000 });
   } catch (error) {
     res.status(500).json({
       message: "Ogólny błąd serwera, proszę skontaktować się z administratorem",

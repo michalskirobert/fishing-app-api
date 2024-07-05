@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import fishingSpotsRoutes from "@routes/fishingSpotsRoutes";
 import authRoutes from "@routes/authRoutes";
 import { authMiddleware } from "@middlewares/authMiddleware";
