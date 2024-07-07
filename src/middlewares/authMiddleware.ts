@@ -1,24 +1,26 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+import env from "@config/env";
+
 export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  const token = req.headers.authorization?.replace("Bearer ", "");
 
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Brak uprawnień" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "") as {
-      id: string;
-    };
-    req.body.id = decoded.id; // Attach user id to request object
+    jwt.verify(token, env.JWT_SECRET);
+
     next();
   } catch (error) {
-    res.status(401).json({ message: "Token is not valid" });
+    return res
+      .status(403)
+      .json({ message: "Token użytkownika jest nie ważny" });
   }
 };

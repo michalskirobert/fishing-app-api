@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
 import { connectDatabase } from "@config/database";
+import {
+  FishingSpotProps,
+  ParsedFishingSpotsProps,
+} from "@namespace/fishing-spots";
+
+import { Collection, CollectionInfo, Db, ObjectId } from "mongodb";
 
 export const getAllFishingSpots = async (
   req: Request,
@@ -13,17 +19,20 @@ export const getAllFishingSpots = async (
       return;
     }
 
-    const collections = await db?.listCollections().toArray();
+    const collections: (CollectionInfo | Pick<CollectionInfo, "name">)[] =
+      await db.listCollections().toArray();
 
-    const allData: { [key: string]: any[] } = {};
+    const allData: ParsedFishingSpotsProps = {};
     for (const collectionInfo of collections) {
-      const collection = db?.collection(collectionInfo.name);
-      const documents = await collection.find().toArray();
+      const collection: Collection<FishingSpotProps> | undefined =
+        db.collection<FishingSpotProps>(collectionInfo.name);
+      const documents: FishingSpotProps[] = await collection.find().toArray();
       allData[collectionInfo.name] = documents;
     }
 
     res.status(200).json(allData);
   } catch (error) {
+    console.error("Error fetching fishing spots:", error);
     res.status(500).json({
       message: "Ogólny błąd serwera. Proszę skontaktować się z administratorem",
     });
@@ -50,20 +59,34 @@ export const getAllFishingSpots = async (
 //   }
 // };
 
-// export const createFishingSpot = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { name, location } = req.body;
+export const createFishingSpot = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const db = await connectDatabase("spots");
 
-//   try {
-//     const newSpot = await fishingSpotService.createFishingSpot(name, location);
-//     res.status(201).json(newSpot);
-//   } catch (error) {
-//     console.error("Error creating fishing spot:", error);
-//     res.status(500).json({ message: "Server Error" });
-//   }
-// };
+  if (!req.body) {
+    res
+      .status(400)
+      .json({ message: 'Brak danych w żądaniu o parametrze "body"' });
+    return;
+  }
+
+  try {
+    const requestBody: FishingSpotProps = req.body;
+
+    const collection = db?.collection(requestBody.area);
+
+    const uploadedData = await collection?.insertOne(requestBody);
+
+    res.status(200).json({ _id: uploadedData?.insertedId, requestBody });
+  } catch (error) {
+    res.status(500).json({
+      message:
+        "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
+    });
+  }
+};
 
 // export const updateFishingSpot = async (
 //   req: Request,
