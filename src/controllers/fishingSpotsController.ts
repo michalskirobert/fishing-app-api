@@ -5,7 +5,7 @@ import {
   ParsedFishingSpotsProps,
 } from "@namespace/fishing-spots";
 
-import { Collection, CollectionInfo, Db, ObjectId } from "mongodb";
+import { Collection, CollectionInfo } from "mongodb";
 
 export const getAllFishingSpots = async (
   req: Request,
