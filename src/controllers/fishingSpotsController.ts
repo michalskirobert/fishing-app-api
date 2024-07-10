@@ -5,7 +5,7 @@ import {
   ParsedFishingSpotsProps,
 } from "@namespace/fishing-spots";
 
-import { Collection, CollectionInfo } from "mongodb";
+import { Collection, CollectionInfo, ObjectId } from "mongodb";
 
 const baseDatabaseName = "spots";
 
@@ -46,7 +46,7 @@ export const getFishingSpot = async (
   res: Response
 ): Promise<void> => {
   try {
-    const db = await connectDatabase(baseDatabaseName);
+    const db = await connectDatabase("spots");
 
     if (!db) {
       res
@@ -55,7 +55,27 @@ export const getFishingSpot = async (
       return;
     }
 
-    const foundSpot = db.collection(req.params.id);
+    const { name, id } = req.params;
+
+    // Ensure collection exists
+    const collections = await db.listCollections({ name }).toArray();
+    if (collections.length === 0) {
+      res
+        .status(404)
+        .json({ message: "Brak łowiska o podanym identyfikatorze" });
+      return;
+    }
+
+    // Find the document by id
+    const collection = db.collection(name);
+    const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!foundSpot) {
+      res
+        .status(404)
+        .json({ message: "Brak łowiska o podanym identyfikatorze" });
+      return;
+    }
 
     res.status(200).json(foundSpot);
   } catch (error) {
@@ -84,10 +104,23 @@ export const createFishingSpot = async (
 
     const collection = db?.collection(requestBody.area);
 
+    // Check if a spot with the same name or code already exists
+    const existingSpot = await collection?.findOne({
+      $or: [{ name: requestBody.name }, { code: requestBody.code }],
+    });
+
+    if (existingSpot) {
+      res.status(409).json({
+        message: "Łowisko o podanej nazwie lub kodzie już istnieje",
+      });
+      return;
+    }
+
     const uploadedData = await collection?.insertOne(requestBody);
 
     res.status(200).json({ ...requestBody, _id: uploadedData?.insertedId });
   } catch (error) {
+    console.error("Wystąpił błąd podczas przesyłania danych:", error);
     res.status(500).json({
       message:
         "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
