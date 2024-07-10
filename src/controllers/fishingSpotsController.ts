@@ -34,7 +34,7 @@ export const getAllFishingSpots = async (
 
     res.status(200).json(allData);
   } catch (error) {
-    console.error("Error fetching fishing spots:", error);
+    console.error("Błąd podczas pobierania danych dla łowisk", error);
     res.status(500).json({
       message: "Ogólny błąd serwera. Proszę skontaktować się z administratorem",
     });
@@ -111,7 +111,7 @@ export const createFishingSpot = async (
 
     if (existingSpot) {
       res.status(409).json({
-        message: "Łowisko o podanej nazwie lub kodzie już istnieje",
+        message: `Łowisko ${requestBody.name} (kod: ${requestBody.code}) już istnieje w okręgu ${requestBody.area}`,
       });
       return;
     }
