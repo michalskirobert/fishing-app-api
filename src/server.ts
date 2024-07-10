@@ -1,5 +1,6 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import fishingSpotsRoutes from "@routes/fishingSpotsRoutes";
+import dictionaryRoutes from "@routes/dictionaries";
 import authRoutes from "@routes/authRoutes";
 import { authMiddleware } from "@middlewares/authMiddleware";
 
@@ -29,7 +30,11 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 app.use("/api/fishing-spots", authMiddleware, fishingSpotsRoutes);
+app.use("/api/dictionaries", authMiddleware, dictionaryRoutes);
 app.use("/api/authentication", authRoutes);
+app.get("/api/init", (req: Request, resp: Response) => ({
+  version: "0.0.1",
+}));
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

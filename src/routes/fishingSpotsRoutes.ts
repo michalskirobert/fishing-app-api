@@ -1,8 +1,8 @@
 import express from "express";
 import {
   getAllFishingSpots,
-  // getFishingSpotById,
   createFishingSpot,
+  getFishingSpot,
   // updateFishingSpot,
   // deleteFishingSpot,
 } from "@controllers/fishingSpotsController";
@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.get("/", getAllFishingSpots);
-// router.get("/:id", getFishingSpotById);
+router.get("/:id", getFishingSpot);
 router.post("/", createFishingSpot);
 // router.put("/:id", updateFishingSpot);
 // router.delete("/:id", deleteFishingSpot);

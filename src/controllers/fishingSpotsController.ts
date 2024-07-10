@@ -7,12 +7,14 @@ import {
 
 import { Collection, CollectionInfo } from "mongodb";
 
+const baseDatabaseName = "spots";
+
 export const getAllFishingSpots = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const db = await connectDatabase("spots");
+    const db = await connectDatabase(baseDatabaseName);
 
     if (!db) {
       res.status(404).json({ message: "Brak listy łowisk w bazie danych" });
@@ -39,31 +41,36 @@ export const getAllFishingSpots = async (
   }
 };
 
-// export const getFishingSpotById = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { id } = req.params;
+export const getFishingSpot = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase(baseDatabaseName);
 
-//   try {
-//     const spot = await fishingSpotService.getFishingSpotById(id);
-//     if (!spot) {
-//       res.status(404).json({ message: "Fishing spot not found" });
-//       return;
-//     }
-//     res.json(spot);
-//   } catch (error) {
-//     res.status(404).json({
-//       message: `Nie znaleziono danego łowiska o identyfikatorze ${req.params.id}`,
-//     });
-//   }
-// };
+    if (!db) {
+      res
+        .status(404)
+        .json({ message: "Brak łowiska o podanym identyfikatorze" });
+      return;
+    }
+
+    const foundSpot = db.collection(req.params.id);
+
+    res.status(200).json(foundSpot);
+  } catch (error) {
+    console.error("Błąd podczas wczytywania łowiska", error);
+    res.status(500).json({
+      message: "Ogólny błąd serwera. Proszę skontaktować się z administratorem",
+    });
+  }
+};
 
 export const createFishingSpot = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const db = await connectDatabase("spots");
+  const db = await connectDatabase(baseDatabaseName);
 
   if (!req.body) {
     res
@@ -79,7 +86,7 @@ export const createFishingSpot = async (
 
     const uploadedData = await collection?.insertOne(requestBody);
 
-    res.status(200).json({ _id: uploadedData?.insertedId, requestBody });
+    res.status(200).json({ ...requestBody, _id: uploadedData?.insertedId });
   } catch (error) {
     res.status(500).json({
       message:
