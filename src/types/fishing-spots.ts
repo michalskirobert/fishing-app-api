@@ -11,6 +11,7 @@ export type FishingSpotProps = {
   addedDate: string;
   leaseUntil: string;
   isPossibleLeaseEnd: boolean;
+  code: string;
 };
 
 export type ParsedFishingSpotsProps = {
