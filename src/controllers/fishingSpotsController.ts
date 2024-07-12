@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import { connectDatabase } from "@config/database";
-import {
-  FishingSpotProps,
-  ParsedFishingSpotsProps,
-} from "@namespace/fishing-spots";
+import { FishingSpotProps } from "@namespace/fishing-spots";
 
 import { Collection, CollectionInfo, ObjectId } from "mongodb";
 
@@ -24,15 +21,22 @@ export const getAllFishingSpots = async (
     const collections: (CollectionInfo | Pick<CollectionInfo, "name">)[] =
       await db.listCollections().toArray();
 
-    const allData: ParsedFishingSpotsProps = {};
+    const allData: FishingSpotProps[] = [];
+
     for (const collectionInfo of collections) {
       const collection: Collection<FishingSpotProps> | undefined =
         db.collection<FishingSpotProps>(collectionInfo.name);
+
       const documents: FishingSpotProps[] = await collection.find().toArray();
-      allData[collectionInfo.name] = documents;
+
+      const processedDocuments = documents.map(
+        ({ geolocation, ...restItem }) => ({ ...restItem })
+      );
+
+      allData.push(...processedDocuments);
     }
 
-    res.status(200).json(allData);
+    res.status(200).json({ items: allData, totalItems: allData.length });
   } catch (error) {
     console.error("Błąd podczas pobierania danych dla łowisk", error);
     res.status(500).json({
@@ -49,39 +53,35 @@ export const getFishingSpot = async (
     const db = await connectDatabase("spots");
 
     if (!db) {
-      res
-        .status(404)
-        .json({ message: "Brak łowiska o podanym identyfikatorze" });
+      res.status(404).json({ message: "Database connection failed" });
       return;
     }
 
-    const { name, id } = req.params;
+    const { area, id } = req.params;
 
     // Ensure collection exists
-    const collections = await db.listCollections({ name }).toArray();
+    const collections = await db.listCollections({ name: area }).toArray();
     if (collections.length === 0) {
-      res
-        .status(404)
-        .json({ message: "Brak łowiska o podanym identyfikatorze" });
+      res.status(404).json({ message: `Nie znaleziono okręgu "${area}"` });
       return;
     }
 
-    // Find the document by id
-    const collection = db.collection(name);
-    const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
+    // Find the document by id in the specified collection
+    const collection = db.collection(area);
+    const foundSpot = await collection.findOne({ id });
 
     if (!foundSpot) {
-      res
-        .status(404)
-        .json({ message: "Brak łowiska o podanym identyfikatorze" });
+      res.status(404).json({
+        message: `Nie znaleziono łowiska w okręgu ${area} o identyfikatorze ${id}`,
+      });
       return;
     }
 
     res.status(200).json(foundSpot);
   } catch (error) {
-    console.error("Błąd podczas wczytywania łowiska", error);
     res.status(500).json({
-      message: "Ogólny błąd serwera. Proszę skontaktować się z administratorem",
+      message:
+        "Wystąpił ogólny błąd z serwerem. Proszę skontaktować się z adminsitratorem.",
     });
   }
 };

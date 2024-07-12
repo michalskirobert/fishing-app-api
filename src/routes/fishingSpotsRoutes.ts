@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.get("/", getAllFishingSpots);
-router.get("/:id", getFishingSpot);
+router.get("/:area/:id", getFishingSpot);
 router.post("/", createFishingSpot);
 // router.put("/:id", updateFishingSpot);
 // router.delete("/:id", deleteFishingSpot);

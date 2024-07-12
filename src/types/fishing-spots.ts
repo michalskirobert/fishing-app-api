@@ -1,9 +1,10 @@
+import { ObjectId } from "mongodb";
+
 export type FishingSpotProps = {
-  id: `${number}.${number}` | `.${number}`;
   name: string;
   area: string;
   isNoKill: boolean;
-  geolocation: {
+  geolocation?: {
     latitude: string;
     longitude: string;
   };
@@ -12,8 +13,4 @@ export type FishingSpotProps = {
   leaseUntil: string;
   isPossibleLeaseEnd: boolean;
   code: string;
-};
-
-export type ParsedFishingSpotsProps = {
-  [x: string]: FishingSpotProps[];
 };
