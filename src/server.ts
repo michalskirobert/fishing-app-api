@@ -6,6 +6,7 @@ import { authMiddleware } from "@middlewares/authMiddleware";
 
 import cors from "cors";
 import env from "./config/env";
+import path from "path";
 
 const app = express();
 const port = env.PORT;
@@ -39,3 +40,6 @@ app.get("/api/init", (req: Request, resp: Response) => ({
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
