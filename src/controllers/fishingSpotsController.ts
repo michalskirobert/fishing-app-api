@@ -68,7 +68,7 @@ export const getFishingSpot = async (
 
     // Find the document by id in the specified collection
     const collection = db.collection(area);
-    const foundSpot = await collection.findOne({ id });
+    const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
 
     if (!foundSpot) {
       res.status(404).json({
@@ -120,7 +120,6 @@ export const createFishingSpot = async (
 
     res.status(200).json({ ...requestBody, _id: uploadedData?.insertedId });
   } catch (error) {
-    console.error("Wystąpił błąd podczas przesyłania danych:", error);
     res.status(500).json({
       message:
         "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
@@ -128,41 +127,93 @@ export const createFishingSpot = async (
   }
 };
 
-// export const updateFishingSpot = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { id } = req.params;
-//   const { name, location } = req.body;
+export const updateFishingSpot = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase("spots");
 
-//   try {
-//     const updatedSpot = await fishingSpotService.updateFishingSpot(
-//       id,
-//       name,
-//       location
-//     );
-//     if (!updatedSpot) {
-//       res.status(404).json({ message: "Fishing spot not found" });
-//       return;
-//     }
-//     res.json(updatedSpot);
-//   } catch (error) {
-//     console.error("Error updating fishing spot:", error);
-//     res.status(500).json({ message: "Server Error" });
-//   }
-// };
+    if (!db) {
+      res.status(404).json({ message: "Database connection failed" });
+      return;
+    }
 
-// export const deleteFishingSpot = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { id } = req.params;
+    const { area, id } = req.params;
+    const updateData = req.body;
 
-//   try {
-//     await fishingSpotService.deleteFishingSpot(id);
-//     res.status(204).end();
-//   } catch (error) {
-//     console.error("Error deleting fishing spot:", error);
-//     res.status(500).json({ message: "Server Error" });
-//   }
-// };
+    console.log("Updating fishing spot with params:", { area, id, updateData });
+
+    // Ensure collection exists
+    const collection = db.collection(area);
+
+    // Ensure _id is not in updateData
+    delete updateData._id;
+
+    const fieldId = new ObjectId(id);
+
+    // Update based on id (assuming id is your custom identifier)
+    const result = await collection.updateOne(
+      { _id: fieldId },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      res
+        .status(404)
+        .json({ message: "No fishing spot found with the given ID" });
+      return;
+    }
+
+    const updatedSpot = await collection.findOne({ _id: fieldId });
+    res.status(200).json(updatedSpot);
+  } catch (error) {
+    console.error("Error while updating fishing spot:", error);
+    res.status(500).json({
+      message: "Server error. Please contact the administrator.",
+    });
+  }
+};
+
+export const deleteFishingSpot = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase("spots");
+
+    if (!db) {
+      res.status(404).json({ message: "Database connection failed" });
+      return;
+    }
+
+    const { area, id } = req.params;
+
+    // Ensure collection exists
+    const collections = await db.listCollections({ name: area }).toArray();
+    if (collections.length === 0) {
+      res
+        .status(404)
+        .json({ message: "No collection found for the given area" });
+      return;
+    }
+
+    // Delete the document by id in the specified collection
+    const collection = db.collection(area);
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      res
+        .status(404)
+        .json({ message: "No fishing spot found with the given ID" });
+      return;
+    }
+
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({
+      message:
+        "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
+    });
+  }
+};

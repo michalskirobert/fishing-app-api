@@ -3,6 +3,8 @@ import {
   getAllFishingSpots,
   createFishingSpot,
   getFishingSpot,
+  updateFishingSpot,
+  deleteFishingSpot,
   // updateFishingSpot,
   // deleteFishingSpot,
 } from "@controllers/fishingSpotsController";
@@ -10,9 +12,9 @@ import {
 const router = express.Router();
 
 router.get("/", getAllFishingSpots);
-router.get("/:area/:id", getFishingSpot);
 router.post("/", createFishingSpot);
-// router.put("/:id", updateFishingSpot);
-// router.delete("/:id", deleteFishingSpot);
+router.get("/:area/:id", getFishingSpot);
+router.put("/:area/:id", updateFishingSpot);
+router.delete("/:area/:id", deleteFishingSpot);
 
 export default router;
