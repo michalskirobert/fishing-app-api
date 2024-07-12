@@ -2,6 +2,7 @@
   "name": "Fishing-API",
   "version": "1.0.0",
   "main": "dist/server.js",
+  "license": "MIT",
   "scripts": {
     "start": "node -r tsconfig-paths/register dist/server.js",
     "build": "tsc",
