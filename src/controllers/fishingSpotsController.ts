@@ -3,6 +3,7 @@ import { connectDatabase } from "@config/database";
 import { FishingSpotProps } from "@namespace/fishing-spots";
 
 import { Collection, CollectionInfo, ObjectId } from "mongodb";
+import { capitalizeFirstLetter } from "@utils/functions";
 
 const baseDatabaseName = "spots";
 
@@ -30,7 +31,10 @@ export const getAllFishingSpots = async (
       const documents: FishingSpotProps[] = await collection.find().toArray();
 
       const processedDocuments = documents.map(
-        ({ geolocation, ...restItem }) => ({ ...restItem })
+        ({ geolocation, ...restItem }) => ({
+          ...restItem,
+          area: capitalizeFirstLetter(restItem?.area),
+        })
       );
 
       allData.push(...processedDocuments);
