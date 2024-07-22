@@ -33,7 +33,7 @@ export const getAllFishingSpots = async (
       const processedDocuments = documents.map(
         ({ geolocation, ...restItem }) => ({
           ...restItem,
-          area: capitalizeFirstLetter(restItem?.area),
+          area: capitalizeFirstLetter(restItem?.distrcit),
         })
       );
 
@@ -106,7 +106,7 @@ export const createFishingSpot = async (
   try {
     const requestBody: FishingSpotProps = req.body;
 
-    const collection = db?.collection(requestBody.area);
+    const collection = db?.collection(requestBody.distrcit);
 
     // Check if a spot with the same name or code already exists
     const existingSpot = await collection?.findOne({
@@ -115,7 +115,7 @@ export const createFishingSpot = async (
 
     if (existingSpot) {
       res.status(409).json({
-        message: `Łowisko ${requestBody.name} (kod: ${requestBody.code}) już istnieje w okręgu ${requestBody.area}`,
+        message: `Łowisko ${requestBody.name} (kod: ${requestBody.code}) już istnieje w okręgu ${requestBody.distrcit}`,
       });
       return;
     }

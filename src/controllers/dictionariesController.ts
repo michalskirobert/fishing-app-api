@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { connectDatabase } from "@config/database";
 import { FishingSpotProps } from "@namespace/fishing-spots";
-import { capitalizeFirstLetter } from "@utils/functions";
 
 export const getSpotsDictionaryController = async (
   req: Request,
@@ -15,21 +14,16 @@ export const getSpotsDictionaryController = async (
       return;
     }
 
-    const collection = db.collection<FishingSpotProps>("spots");
+    const collection = db.collection<FishingSpotProps>("districts");
 
-    const areaDictionaries = await collection.find().toArray();
+    const districtDictionaries = await collection.find().toArray();
 
-    const processedSpots = areaDictionaries.map((item) => ({
-      ...item,
-      area: capitalizeFirstLetter(item?.area),
-    }));
-
-    if (!processedSpots?.length) {
+    if (!districtDictionaries?.length) {
       res.status(404).json({ message: "Brak okręgów w słowniku" });
       return;
     }
 
-    res.status(200).json(processedSpots);
+    res.status(200).json(districtDictionaries);
   } catch (error) {
     console.error("Błąd podczas pobierania słownika okręgów", error);
     res.status(500).json({
