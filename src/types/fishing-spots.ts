@@ -1,7 +1,7 @@
 export type FishingSpotProps = {
   name: string;
   club: string;
-  distrcit: string;
+  district: string;
   code: string;
   isNoKill?: boolean;
   geolocation?: {

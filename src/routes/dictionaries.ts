@@ -3,6 +3,6 @@ import { getSpotsDictionaryController } from "@controllers/dictionariesControlle
 
 const router = express.Router();
 
-router.get("/spots", getSpotsDictionaryController);
+router.get("/districts", getSpotsDictionaryController);
 
 export default router;
