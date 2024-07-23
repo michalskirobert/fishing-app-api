@@ -34,6 +34,7 @@ export const getAllFishingSpots = async (
         ({ geolocation, ...restItem }) => ({
           ...restItem,
           district: capitalizeFirstLetter(restItem?.district),
+          isNoKill: restItem.type === "Łowiska złow i wypuść",
         })
       );
 

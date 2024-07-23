@@ -1,8 +1,13 @@
 import express from "express";
-import { getSpotsDictionaryController } from "@controllers/dictionariesController";
+import {
+  getDistrictsDictionaryController,
+  getSpotTypesDictionaryController,
+} from "@controllers/dictionariesController";
 
 const router = express.Router();
 
-router.get("/districts", getSpotsDictionaryController);
+router.get("/districts", getDistrictsDictionaryController);
+
+router.get("/spot-types", getSpotTypesDictionaryController);
 
 export default router;

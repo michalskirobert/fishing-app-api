@@ -3,6 +3,8 @@ export type FishingSpotProps = {
   club: string;
   district: string;
   code: string;
+  surfaceArea: number;
+  type: string;
   isNoKill?: boolean;
   geolocation?: {
     lat: number;
