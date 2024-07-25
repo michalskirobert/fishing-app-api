@@ -7,9 +7,11 @@ import { commonMessages } from "@utils/constants";
 import {
   buildFilterQuery,
   buildSortObject,
+  Filter,
   parseQueryArray,
+  Sorting,
 } from "@utils/functions/table";
-import { capitalizeFirstLetter } from "@utils/functions/words";
+import { capitalizeFirstLetter } from "@utils/functions/transform-string";
 
 const baseDatabaseName = "spots";
 
@@ -28,40 +30,25 @@ export const getAllFishingSpots = async (
     const skip = parseInt(req.query.skip as string, 10) || 0;
     const take = parseInt(req.query.take as string, 10) || 10;
 
-    // Log raw query parameters
-    console.log("Raw Query Parameters:", req.query);
+    // Ensure query parameters are parsed as strings and convert them
+    const filters = parseQueryArray(
+      (req.query.filters as string[]) || []
+    ) as Filter[];
+    const sortings = parseQueryArray(
+      (req.query.sortings as string[]) || []
+    ) as Sorting[];
 
-    // Parse filters and sortings from query parameters
-    const filters = (req.query.filters as string[]) || [];
-    const sortings = (req.query.sortings as string[]) || [];
+    const filterQuery = buildFilterQuery(filters);
+    const sortObject = buildSortObject(sortings);
 
-    console.log("Filters:", filters);
-    console.log("Sortings:", sortings);
+    const collections = await db.listCollections().toArray();
 
-    // Convert the query parameters to the correct format
-    const parsedFilters = parseQueryArray(filters);
-    const parsedSortings = parseQueryArray(sortings);
-
-    const filterQuery = buildFilterQuery(parsedFilters);
-    const sortObject = buildSortObject(parsedSortings);
-
-    console.log("Skip:", skip);
-    console.log("Take:", take);
-    console.log("Parsed Filters:", parsedFilters);
-    console.log("Parsed Sortings:", parsedSortings);
-    console.log("Filter Query:", filterQuery);
-    console.log("Sort Object:", sortObject);
-
-    const collections: (CollectionInfo | Pick<CollectionInfo, "name">)[] =
-      await db.listCollections().toArray();
-
-    const allData: FishingSpotProps[] = [];
+    const allData: any[] = [];
 
     for (const collectionInfo of collections) {
-      const collection: Collection<FishingSpotProps> | undefined =
-        db.collection<FishingSpotProps>(collectionInfo.name);
+      const collection = db.collection(collectionInfo.name);
 
-      const documents: FishingSpotProps[] = await collection
+      const documents = await collection
         .find(filterQuery)
         .sort(sortObject)
         .skip(skip)
