@@ -1,3 +1,4 @@
+import { commonMessages } from "@utils/constants";
 import { Request, Response, NextFunction } from "express";
 
 export const errorHandler = (
@@ -7,6 +8,6 @@ export const errorHandler = (
   next: NextFunction
 ): void => {
   const status = err.status || 500;
-  const message = err.message || "Internal Server Error";
+  const message = err.message || commonMessages.commonServerError;
   res.status(status).json({ message });
 };

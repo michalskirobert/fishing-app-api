@@ -3,8 +3,13 @@ import { connectDatabase } from "@config/database";
 import { FishingSpotProps } from "@namespace/fishing-spots";
 
 import { Collection, CollectionInfo, ObjectId } from "mongodb";
-import { capitalizeFirstLetter } from "@utils/functions";
 import { commonMessages } from "@utils/constants";
+import {
+  buildFilterQuery,
+  buildSortObject,
+  parseQueryArray,
+} from "@utils/functions/table";
+import { capitalizeFirstLetter } from "@utils/functions/words";
 
 const baseDatabaseName = "spots";
 
@@ -20,6 +25,33 @@ export const getAllFishingSpots = async (
       return;
     }
 
+    const skip = parseInt(req.query.skip as string, 10) || 0;
+    const take = parseInt(req.query.take as string, 10) || 10;
+
+    // Log raw query parameters
+    console.log("Raw Query Parameters:", req.query);
+
+    // Parse filters and sortings from query parameters
+    const filters = (req.query.filters as string[]) || [];
+    const sortings = (req.query.sortings as string[]) || [];
+
+    console.log("Filters:", filters);
+    console.log("Sortings:", sortings);
+
+    // Convert the query parameters to the correct format
+    const parsedFilters = parseQueryArray(filters);
+    const parsedSortings = parseQueryArray(sortings);
+
+    const filterQuery = buildFilterQuery(parsedFilters);
+    const sortObject = buildSortObject(parsedSortings);
+
+    console.log("Skip:", skip);
+    console.log("Take:", take);
+    console.log("Parsed Filters:", parsedFilters);
+    console.log("Parsed Sortings:", parsedSortings);
+    console.log("Filter Query:", filterQuery);
+    console.log("Sort Object:", sortObject);
+
     const collections: (CollectionInfo | Pick<CollectionInfo, "name">)[] =
       await db.listCollections().toArray();
 
@@ -29,7 +61,12 @@ export const getAllFishingSpots = async (
       const collection: Collection<FishingSpotProps> | undefined =
         db.collection<FishingSpotProps>(collectionInfo.name);
 
-      const documents: FishingSpotProps[] = await collection.find().toArray();
+      const documents: FishingSpotProps[] = await collection
+        .find(filterQuery)
+        .sort(sortObject)
+        .skip(skip)
+        .limit(take)
+        .toArray();
 
       const processedDocuments = documents.map(
         ({ geolocation, ...restItem }) => ({
@@ -46,7 +83,8 @@ export const getAllFishingSpots = async (
   } catch (error) {
     console.error("Błąd podczas pobierania danych dla łowisk", error);
     res.status(500).json({
-      message: commonMessages.commonServerError,
+      message:
+        "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
     });
   }
 };
