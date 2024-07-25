@@ -37,7 +37,7 @@ app.use(cors(corsOptions));
 
 app.get("/api/init", (req: Request, resp: Response) =>
   resp.status(200).json({
-    version: "0.0.5",
+    version: "0.0.6",
   })
 );
 

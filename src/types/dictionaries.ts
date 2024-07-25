@@ -1,5 +1,14 @@
-export type SpotsDictionaryProps = {
-  id: number;
+export type ClubProps = {
   name: string;
-  concatedName: string;
+  districtName: string;
+};
+
+export type DistrictProps = {
+  name: string;
+  keyName: string;
+  clubs: ClubProps[];
+};
+
+export type SpotTypeProps = {
+  name: string;
 };

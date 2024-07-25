@@ -4,6 +4,7 @@ import { FishingSpotProps } from "@namespace/fishing-spots";
 
 import { Collection, CollectionInfo, ObjectId } from "mongodb";
 import { capitalizeFirstLetter } from "@utils/functions";
+import { commonMessages } from "@utils/constants";
 
 const baseDatabaseName = "spots";
 
@@ -45,7 +46,7 @@ export const getAllFishingSpots = async (
   } catch (error) {
     console.error("Błąd podczas pobierania danych dla łowisk", error);
     res.status(500).json({
-      message: "Ogólny błąd serwera. Proszę skontaktować się z administratorem",
+      message: commonMessages.commonServerError,
     });
   }
 };
@@ -85,8 +86,7 @@ export const getFishingSpot = async (
     res.status(200).json(foundSpot);
   } catch (error) {
     res.status(500).json({
-      message:
-        "Wystąpił ogólny błąd z serwerem. Proszę skontaktować się z adminsitratorem.",
+      message: commonMessages.commonServerError,
     });
   }
 };
@@ -126,8 +126,7 @@ export const createFishingSpot = async (
     res.status(200).json({ ...requestBody, _id: uploadedData?.insertedId });
   } catch (error) {
     res.status(500).json({
-      message:
-        "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
+      message: commonMessages.commonServerError,
     });
   }
 };
@@ -146,8 +145,6 @@ export const updateFishingSpot = async (
 
     const { area, id } = req.params;
     const updateData = req.body;
-
-    console.log("Updating fishing spot with params:", { area, id, updateData });
 
     // Ensure collection exists
     const collection = db.collection(area);
@@ -175,7 +172,7 @@ export const updateFishingSpot = async (
   } catch (error) {
     console.error("Error while updating fishing spot:", error);
     res.status(500).json({
-      message: "Server error. Please contact the administrator.",
+      message: commonMessages.commonServerError,
     });
   }
 };
@@ -217,8 +214,7 @@ export const deleteFishingSpot = async (
     res.status(204).end();
   } catch (error) {
     res.status(500).json({
-      message:
-        "Wystąpił błąd podczas przesyłania danych, proszę spróbować później",
+      message: commonMessages.commonServerError,
     });
   }
 };
