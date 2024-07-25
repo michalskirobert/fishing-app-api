@@ -27,28 +27,29 @@ export const getAllFishingSpots = async (
       return;
     }
 
-    const skip = parseInt(req.query.skip as string, 10) || 0;
-    const take = parseInt(req.query.take as string, 10) || 10;
+    const skip: number = parseInt(req.query.skip as string, 10) || 0;
+    const take: number = parseInt(req.query.take as string, 10) || 10;
 
     // Ensure query parameters are parsed as strings and convert them
-    const filters = parseQueryArray(
+    const filters: Filter[] = parseQueryArray(
       (req.query.filters as string[]) || []
     ) as Filter[];
-    const sortings = parseQueryArray(
+    const sortings: Sorting[] = parseQueryArray(
       (req.query.sortings as string[]) || []
     ) as Sorting[];
 
     const filterQuery = buildFilterQuery(filters);
     const sortObject = buildSortObject(sortings);
 
-    const collections = await db.listCollections().toArray();
+    const collections: CollectionInfo[] = await db.listCollections().toArray();
 
-    const allData: any[] = [];
+    const allData: FishingSpotProps[] = [];
 
     for (const collectionInfo of collections) {
-      const collection = db.collection(collectionInfo.name);
+      const collection: Collection<FishingSpotProps> =
+        db.collection<FishingSpotProps>(collectionInfo.name);
 
-      const documents = await collection
+      const documents: FishingSpotProps[] = await collection
         .find(filterQuery)
         .sort(sortObject)
         .skip(skip)
