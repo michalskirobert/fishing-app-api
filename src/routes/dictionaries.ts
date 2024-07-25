@@ -1,13 +1,25 @@
 import express from "express";
 import {
-  getDistrictsDictionaryController,
-  getSpotTypesDictionaryController,
+  createDistrictsDictionaries,
+  createSpotTypeDictionary,
+  getDistrictDictionary,
+  getDistrictsDictionary,
+  getSpotTypesDictionary,
+  updateDistrictDictionaries,
+  updateSpotTypeDictionary,
+  getSpotTypeDictionary,
 } from "@controllers/dictionariesController";
 
 const router = express.Router();
 
-router.get("/districts", getDistrictsDictionaryController);
+router.get("/districts", getDistrictsDictionary);
+router.get("/districts/:id", getDistrictDictionary);
+router.put("/districts/:id", updateDistrictDictionaries);
+router.post("/districts", createDistrictsDictionaries);
 
-router.get("/spot-types", getSpotTypesDictionaryController);
+router.get("/spot-types", getSpotTypesDictionary);
+router.get("/spot-types/:id", getSpotTypeDictionary);
+router.put("/spot-types/:id", updateSpotTypeDictionary);
+router.post("/spot-types", createSpotTypeDictionary);
 
 export default router;

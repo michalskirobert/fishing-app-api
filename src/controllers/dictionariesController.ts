@@ -8,7 +8,7 @@ import { commonMessages } from "@utils/constants";
 
 const baseURL = "dictionaries";
 
-export const getDistrictsDictionaryController = async (
+export const getDistrictsDictionary = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -34,6 +34,39 @@ export const getDistrictsDictionaryController = async (
     console.error("Błąd podczas pobierania słownika okręgów", error);
     res.status(500).json({
       message: "Ogólny błąd serwera. Proszę skontaktować się z administratorem",
+    });
+  }
+};
+
+export const getDistrictDictionary = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase(baseURL);
+
+    if (!db) {
+      res.status(404).json({ message: commonMessages.databaseFailure });
+      return;
+    }
+
+    const { id } = req.params;
+
+    // Find the document by id in the specified collection
+    const collection = db.collection<DistrictProps>("districts");
+    const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!foundSpot) {
+      res.status(404).json({
+        message: `Nie znaleziono podanego słownika`,
+      });
+      return;
+    }
+
+    res.status(200).json(foundSpot);
+  } catch (error) {
+    res.status(500).json({
+      message: commonMessages.commonServerError,
     });
   }
 };
@@ -125,7 +158,7 @@ export const createDistrictsDictionaries = async (
 
 //Spots type dictionaries
 
-export const getSpotTypesDictionaryController = async (
+export const getSpotTypesDictionary = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -155,7 +188,7 @@ export const getSpotTypesDictionaryController = async (
   }
 };
 
-export const updateTypeDictionaryController = async (
+export const getSpotTypeDictionary = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -163,44 +196,65 @@ export const updateTypeDictionaryController = async (
     const db = await connectDatabase(baseURL);
 
     if (!db) {
-      res.status(404).json({ message: "Błąd z połączeniem się z bazą danych" });
+      res.status(404).json({ message: commonMessages.databaseFailure });
       return;
     }
 
     const { id } = req.params;
 
-    const updateData = req.body;
+    // Find the document by id in the specified collection
+    const collection = db.collection<SpotTypeProps>("spots-type");
+    const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
 
-    const collection = db?.collection<SpotTypeProps>("districts");
-
-    delete updateData._id;
-
-    const fieldId = new ObjectId(id);
-
-    const result = await collection.updateOne(
-      { _id: fieldId },
-      { $set: updateData }
-    );
-
-    if (result.matchedCount === 0) {
+    if (!foundSpot) {
       res.status(404).json({
-        message: `Nie znaleziono słownika o podanych identyfikatorze ${id}`,
+        message: `Nie znaleziono podanego słownika`,
       });
       return;
     }
 
-    const updatedSpot = await collection.findOne({ _id: fieldId });
-
-    res.status(200).json(updatedSpot);
+    res.status(200).json(foundSpot);
   } catch (error) {
-    console.error("Error while updating fishing spot:", error);
     res.status(500).json({
       message: commonMessages.commonServerError,
     });
   }
 };
 
-export const createTypeDictionaryController = async (
+export const updateSpotTypeDictionary = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase(baseURL);
+
+    if (!db) {
+      res.status(404).json({ message: commonMessages.databaseFailure });
+      return;
+    }
+
+    const { id } = req.params;
+
+    // Find the document by id in the specified collection
+    const collection = db.collection<SpotTypeProps>("spots-type");
+    const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!foundSpot) {
+      res.status(404).json({
+        message: `Nie znaleziono podanego słownika`,
+      });
+      return;
+    }
+
+    res.status(200).json(foundSpot);
+  } catch (error) {
+    res.status(500).json({
+      message: commonMessages.commonServerError,
+    });
+  }
+};
+
+export const createSpotTypeDictionary = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -216,7 +270,7 @@ export const createTypeDictionaryController = async (
   try {
     const requestBody: SpotTypeProps = req.body;
 
-    const collection = db?.collection<SpotTypeProps>("districts");
+    const collection = db?.collection<SpotTypeProps>("spot-types");
 
     // Check if a spot with the same name or code already exists
     const existingSpot = await collection?.findOne({

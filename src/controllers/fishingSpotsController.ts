@@ -73,7 +73,7 @@ export const getFishingSpot = async (
     }
 
     // Find the document by id in the specified collection
-    const collection = db.collection(area);
+    const collection = db.collection<FishingSpotProps>(area);
     const foundSpot = await collection.findOne({ _id: new ObjectId(id) });
 
     if (!foundSpot) {
@@ -147,7 +147,7 @@ export const updateFishingSpot = async (
     const updateData = req.body;
 
     // Ensure collection exists
-    const collection = db.collection(area);
+    const collection = db.collection<FishingSpotProps>(area);
 
     // Ensure _id is not in updateData
     delete updateData._id;
@@ -201,7 +201,7 @@ export const deleteFishingSpot = async (
     }
 
     // Delete the document by id in the specified collection
-    const collection = db.collection(area);
+    const collection = db.collection<FishingSpotProps>(area);
     const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
