@@ -1,3 +1,5 @@
+import { ParsedQs } from "qs";
+
 export interface Filter {
   columnName: string;
   operation: string;
@@ -87,15 +89,39 @@ export const buildSortObject = (sortings: Sorting[]): SortObject => {
   return sortObject;
 };
 
-export const parseQueryArray = (queryArray: string[]): (Filter | Sorting)[] => {
-  const result: (Filter | Sorting)[] = [];
-  for (let i = 0; i < queryArray.length; i += 3) {
-    const columnName = queryArray[i];
-    const operation = queryArray[i + 1];
-    const value = queryArray[i + 2];
+export const parseQueryFilterArray = (
+  queryArray: string | string[] | ParsedQs | ParsedQs[]
+): Filter[] => {
+  const result: Filter[] = [];
+
+  const processedQueryArray = queryArray as string;
+
+  for (let i = 0; i < processedQueryArray?.length; i += 3) {
+    const columnName = processedQueryArray[i];
+    const operation = processedQueryArray[i + 1];
+    const value = processedQueryArray[i + 2];
 
     if (columnName && operation && value !== undefined) {
       result.push({ columnName, operation, value });
+    }
+  }
+
+  return result;
+};
+
+export const parseQuerySortingArray = (
+  queryArray: string | string[] | ParsedQs | ParsedQs[]
+): Sorting[] => {
+  const result: Sorting[] = [];
+
+  const processedQueryArray = queryArray as string;
+
+  for (let i = 0; i < processedQueryArray?.length; i += 3) {
+    const columnName = processedQueryArray[i];
+    const direction = processedQueryArray[i + 1] as "asc" | "desc";
+
+    if (columnName && direction !== undefined) {
+      result.push({ columnName, direction });
     }
   }
 

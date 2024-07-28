@@ -14,7 +14,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     const existingUser = await usersCollection?.findOne({ email });
 
     if (existingUser) {
-      res.status(400).json({ message: "User already exists" });
+      res.status(400).json({ message: "Podany użytkownik już istnieje" });
       return;
     }
 
@@ -29,9 +29,11 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (result?.insertedId) {
-      res.status(201).json({ message: "User created successfully" });
+      res
+        .status(201)
+        .json({ message: "Użytkownik został utworzony prawidłowo" });
     } else {
-      res.status(500).json({ message: "User creation failed" });
+      res.status(500).json({ message: "Użytkownik nie mógł zostać utworzony" });
     }
   } catch (error) {
     res.status(500).json({
@@ -49,14 +51,14 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
     const user = await usersCollection?.findOne({ email });
 
     if (!user) {
-      res.status(400).json({ message: "Invalid email or password" });
+      res.status(400).json({ message: "Nieprawidłowy adres e-mail lub hasło" });
       return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      res.status(400).json({ message: "Invalid email or password" });
+      res.status(400).json({ message: "Nieprawidłowy adres e-mail lub hasło" });
       return;
     }
 

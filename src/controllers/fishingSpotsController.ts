@@ -7,8 +7,8 @@ import { commonMessages } from "@utils/constants";
 import {
   buildFilterQuery,
   buildSortObject,
-  Filter,
-  parseQueryArray,
+  parseQueryFilterArray,
+  parseQuerySortingArray,
   Sorting,
 } from "@utils/functions/table";
 import { capitalizeFirstLetter } from "@utils/functions/transform-string";
@@ -31,12 +31,8 @@ export const getAllFishingSpots = async (
     const take: number = parseInt(req.query.take as string, 10) || 10;
 
     // Ensure query parameters are parsed as strings and convert them
-    const filters: Filter[] = parseQueryArray(
-      (req.query.filters as string[]) || []
-    ) as Filter[];
-    const sortings: Sorting[] = parseQueryArray(
-      (req.query.sortings as string[]) || []
-    ) as Sorting[];
+    const filters = parseQueryFilterArray(req.query.filters || []);
+    const sortings = parseQuerySortingArray(req.query.sortings || []);
 
     const filterQuery = buildFilterQuery(filters);
     const sortObject = buildSortObject(sortings);
