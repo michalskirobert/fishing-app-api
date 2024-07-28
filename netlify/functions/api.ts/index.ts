@@ -1,14 +1,13 @@
 import express, { Request, Response } from "express";
-import fishingSpotsRoutes from "@routes/fishingSpotsRoutes";
-import dictionaryRoutes from "@routes/dictionaries";
-import authRoutes from "@routes/authRoutes";
-import { authMiddleware } from "@middlewares/authMiddleware";
-
+import serverless from "serverless-http";
+import fishingSpotsRoutes from "./../../../src/routes/fishingSpotsRoutes";
+import dictionaryRoutes from "./../../../src//routes/dictionaries";
+import authRoutes from "./../../../src//routes/authRoutes";
+import { authMiddleware } from "./../../../src/middlewares/authMiddleware";
 import cors from "cors";
-import env from "./config/env";
+import env from "./../../../src/config/env";
 
 const app = express();
-const port = env.PORT;
 
 const allowedOrigins = [
   "*",
@@ -32,11 +31,10 @@ const corsOptions = {
 };
 
 app.use(express.json());
-
 app.use(cors(corsOptions));
 
-app.get("/api/init", (req: Request, resp: Response) =>
-  resp.status(200).json({
+app.get("/api/init", (req: Request, res: Response) =>
+  res.status(200).json({
     version: env.VERSION_APP,
   })
 );
@@ -45,6 +43,6 @@ app.use("/api/fishing-spots", authMiddleware, fishingSpotsRoutes);
 app.use("/api/dictionaries", authMiddleware, dictionaryRoutes);
 app.use("/api/authentication", authRoutes);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+const handler = serverless(app);
+
+export { handler };
