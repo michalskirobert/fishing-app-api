@@ -1,5 +1,5 @@
 {
-  "name": "Fishing-API",
+  "name": "fishing-managment-api",
   "version": "1.0.0",
   "main": "dist/server.js",
   "outDir": "./dist",
