@@ -4,8 +4,9 @@ import fishingSpotsRoutes from "./../../../src/routes/fishingSpotsRoutes";
 import dictionaryRoutes from "./../../../src//routes/dictionaries";
 import authRoutes from "./../../../src//routes/authRoutes";
 import { authMiddleware } from "./../../../src/middlewares/authMiddleware";
+import { versionApp } from "./../../../src/utils/version";
+
 import cors from "cors";
-import env from "./../../../src/config/env";
 
 const app = express();
 
@@ -35,7 +36,7 @@ app.use(cors(corsOptions));
 
 app.get("/api/init", (req: Request, res: Response) =>
   res.status(200).json({
-    version: env.VERSION_APP,
+    version: versionApp,
   })
 );
 

@@ -2,6 +2,7 @@
   "name": "Fishing-API",
   "version": "1.0.0",
   "main": "dist/server.js",
+  "outDir": "./dist",
   "license": "MIT",
   "scripts": {
     "start": "node -r tsconfig-paths/register dist/server.js",
@@ -9,6 +10,7 @@
     "dev": "ts-node-dev -r tsconfig-paths/register src/server.ts"
   },
   "dependencies": {
+    "@netlify/functions": "^2.8.1",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express-validator": "^3.0.0",

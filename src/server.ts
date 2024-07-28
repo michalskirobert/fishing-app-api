@@ -3,6 +3,7 @@ import fishingSpotsRoutes from "@routes/fishingSpotsRoutes";
 import dictionaryRoutes from "@routes/dictionaries";
 import authRoutes from "@routes/authRoutes";
 import { authMiddleware } from "@middlewares/authMiddleware";
+import { versionApp } from "@utils/version";
 
 import cors from "cors";
 import env from "./config/env";
@@ -37,7 +38,7 @@ app.use(cors(corsOptions));
 
 app.get("/api/init", (req: Request, resp: Response) =>
   resp.status(200).json({
-    version: env.VERSION_APP,
+    version: versionApp,
   })
 );
 
