@@ -2,7 +2,7 @@ import { ParsedQs } from "qs";
 
 export interface Filter {
   columnName: string;
-  operation: string;
+  operation: keyof typeof operations;
   value: string;
 }
 
@@ -19,7 +19,7 @@ export interface SortObject {
   [key: string]: 1 | -1;
 }
 
-type MongoQueryValue = string | number | RegExp | boolean | null;
+type MongoQueryValue = string | number | RegExp | boolean | Date | null;
 
 interface MongoQuery {
   [key: string]:
@@ -28,26 +28,39 @@ interface MongoQuery {
     | { [key: string]: MongoQueryValue };
 }
 
-export const operations: Record<string, string> = {
-  "<>": "$ne",
-  "<": "$lt",
-  "<=": "$lte",
-  ">": "$gt",
-  ">=": "$gte",
+export const operations = {
+  notEqual: "$ne",
+  lessThan: "$lt",
+  lessThanOrEqual: "$lte",
+  greaterThan: "$gt",
+  greaterThanOrEqual: "$gte",
   equal: "$eq",
   contains: "$regex",
-  between: "between", // This will be handled specially
-  startswith: "$regex",
-  endswith: "$regex",
-  notcontains: "$not",
+  between: "between",
+  startsWith: "$regex",
+  endsWith: "$regex",
+  notContains: "$not",
 };
 
-const checkEqualValue = (value: string): string | boolean => {
+const numericColumns = ["surfaceArea", "pesel", "nip", "permitNo"];
+
+const checkEqualValue = (
+  columnName: string,
+  value: string | number
+): string | number | boolean | Date => {
   if (value === "true") {
     return true;
   }
   if (value === "false") {
     return false;
+  }
+
+  if (!isNaN(+value) && numericColumns.includes(columnName)) {
+    return +value;
+  }
+
+  if (columnName.toLocaleLowerCase().includes("date")) {
+    return new Date(value);
   }
 
   return value;
@@ -60,25 +73,51 @@ export const buildFilterQuery = (filters: Filter[]) => {
     const { columnName, operation, value } = filter;
     const mongoOperator = operations[operation];
 
+    const filterValue = checkEqualValue(columnName, value);
+
+    if (!query[columnName]) {
+      query[columnName] = {};
+    }
+
     if (mongoOperator) {
       switch (operation) {
         case "equal":
-          console.log({ [mongoOperator]: checkEqualValue(value) });
-          query[columnName] = { [mongoOperator]: checkEqualValue(value) };
+          query[columnName] = {
+            [mongoOperator]: filterValue,
+          };
+          break;
+
+        case "notEqual":
+          query[columnName] = { $ne: filterValue };
+          break;
+
+        case "greaterThanOrEqual":
+          query[columnName] = { $gte: filterValue };
+          break;
+
+        case "lessThanOrEqual":
+          query[columnName] = { $lte: filterValue };
+          break;
+
+        case "lessThan":
+          query[columnName] = { $lt: filterValue };
           break;
 
         case "between":
           const [start, end] = value.split(",").map((v) => parseFloat(v));
-          query[columnName] = { $gte: start, $lte: end };
+          query[columnName] = {
+            $gte: checkEqualValue(columnName, start),
+            $lte: checkEqualValue(columnName, end),
+          };
           break;
 
         case "contains":
-        case "startswith":
-        case "endswith":
+        case "startsWith":
+        case "endsWith":
           query[columnName] = { [mongoOperator]: new RegExp(value, "i") };
           break;
 
-        case "notcontains":
+        case "notContains":
           query[columnName] = { [mongoOperator]: new RegExp(value, "i") };
           break;
 
@@ -113,7 +152,7 @@ export const parseQueryFilterArray = (
 
   for (let i = 0; i < processedQueryArray?.length; i += 3) {
     const columnName = processedQueryArray[i];
-    const operation = processedQueryArray[i + 1];
+    const operation = processedQueryArray[i + 1] as keyof typeof operations;
     const value = processedQueryArray[i + 2];
 
     if (columnName && operation && value !== undefined) {

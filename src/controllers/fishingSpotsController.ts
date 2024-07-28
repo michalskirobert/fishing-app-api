@@ -9,7 +9,6 @@ import {
   buildSortObject,
   parseQueryFilterArray,
   parseQuerySortingArray,
-  Sorting,
 } from "@utils/functions/table";
 import { capitalizeFirstLetter } from "@utils/functions/transform-string";
 
@@ -35,6 +34,7 @@ export const getAllFishingSpots = async (
     const sortings = parseQuerySortingArray(req.query.sortings || []);
 
     const filterQuery = buildFilterQuery(filters);
+
     const sortObject = buildSortObject(sortings);
 
     const collections: CollectionInfo[] = await db.listCollections().toArray();
