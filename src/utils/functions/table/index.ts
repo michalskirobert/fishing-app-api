@@ -19,11 +19,14 @@ export interface SortObject {
   [key: string]: 1 | -1;
 }
 
-export type MongoQuery = {
-  [key: string]: {
-    [key: string]: string | number | RegExp;
-  };
-};
+type MongoQueryValue = string | number | RegExp | boolean | null;
+
+interface MongoQuery {
+  [key: string]:
+    | MongoQueryValue
+    | MongoQueryValue[]
+    | { [key: string]: MongoQueryValue };
+}
 
 export const operations: Record<string, string> = {
   "<>": "$ne",
@@ -39,6 +42,17 @@ export const operations: Record<string, string> = {
   notcontains: "$not",
 };
 
+const checkEqualValue = (value: string): string | boolean => {
+  if (value === "true") {
+    return true;
+  }
+  if (value === "false") {
+    return false;
+  }
+
+  return value;
+};
+
 export const buildFilterQuery = (filters: Filter[]) => {
   const query: MongoQuery = {};
 
@@ -49,7 +63,8 @@ export const buildFilterQuery = (filters: Filter[]) => {
     if (mongoOperator) {
       switch (operation) {
         case "equal":
-          query[columnName] = { [mongoOperator]: value };
+          console.log({ [mongoOperator]: checkEqualValue(value) });
+          query[columnName] = { [mongoOperator]: checkEqualValue(value) };
           break;
 
         case "between":
