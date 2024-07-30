@@ -12,3 +12,10 @@ export type DistrictProps = {
 export type SpotTypeProps = {
   name: string;
 };
+
+export type DictionaryProps = {
+  name: string;
+  createdDate: Date | null;
+  language: "pl" | "en" | "uk" | "rus";
+  isActive: boolean;
+};

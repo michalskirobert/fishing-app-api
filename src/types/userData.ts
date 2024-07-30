@@ -1,12 +1,22 @@
+export enum ProfileId {
+  Admin = 1,
+  Moderator = 10,
+  Fisherman = 20,
+}
+
 export type UserDataProps = {
-  _id: string;
   email: string;
   permissions: any[];
+  password: string;
   permitNo: number | null;
   avatar: string;
   accountCreatedDate: string;
   lastVisitedDate: string;
   accessToken: string | null;
-  tokenExprTime: 0;
-  password: string;
+  isLogin: boolean;
+  registries: any[];
+  profileId: ProfileId;
+  pesel: number;
+  birthDate: Date;
+  showMessage?: boolean;
 };

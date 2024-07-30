@@ -4,10 +4,14 @@ import { connectDatabase } from "@config/database";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import env from "@config/env";
+import { ProfileId, UserDataProps } from "@namespace/userData";
+import { WithId } from "mongodb";
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, permitNo, pesel, birthDate } = req.body;
+    const { email, password, permitNo, pesel, birthDate, profileId } =
+      req.body as UserDataProps;
+
     const db = await connectDatabase("auth");
     const usersCollection = db?.collection("users");
 
@@ -15,6 +19,22 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
 
     if (existingUser) {
       res.status(400).json({ message: "Podany użytkownik już istnieje" });
+      return;
+    }
+
+    if (
+      !email ||
+      !password ||
+      !permitNo ||
+      !pesel ||
+      !birthDate ||
+      !profileId
+    ) {
+      res.status(400).json({
+        message:
+          "Brakuje danych do zapisania użytkownika. Uzupelnij wszystkie wymagane pola.",
+      });
+
       return;
     }
 
@@ -26,6 +46,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       permitNo,
       pesel,
       birthDate,
+      profileId,
     });
 
     if (result?.insertedId) {
@@ -46,12 +67,19 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
     const db = await connectDatabase("auth");
-    const usersCollection = db?.collection("users");
+    const usersCollection = db?.collection<WithId<UserDataProps>>("users");
 
     const user = await usersCollection?.findOne({ email });
 
     if (!user) {
       res.status(400).json({ message: "Nieprawidłowy adres e-mail lub hasło" });
+      return;
+    }
+
+    if (user.profileId === ProfileId.Fisherman) {
+      res.status(403).json({
+        message: "Brak wystarczających uprawnień, aby zalogować się do modułu",
+      });
       return;
     }
 
@@ -132,13 +160,16 @@ export const token = async (req: Request, res: Response): Promise<void> => {
           // Respond with the new token
           return res.status(200).json({
             message: "Token wkrótce wygaśnie, oto nowy token.",
+            showMessage: true,
             token: newToken,
           });
         }
 
         // If token is still valid and not about to expire
         res.status(200).json({
+          showMessage: false,
           message: "Token jest ważny.",
+          token,
         });
       }
     );

@@ -1,12 +1,67 @@
 import { Request, Response } from "express";
 import { connectDatabase } from "@config/database";
-import { DistrictProps, SpotTypeProps } from "@namespace/dictionaries";
+import {
+  DictionaryProps,
+  DistrictProps,
+  SpotTypeProps,
+} from "@namespace/dictionaries";
 import { ObjectId } from "mongodb";
 import { commonMessages } from "@utils/constants";
+import {
+  buildFilterQuery,
+  buildSortObject,
+  parseQueryFilterArray,
+  parseQuerySortingArray,
+} from "@utils/functions/table";
 
 //Districts dictionary
 
 const baseURL = "dictionaries";
+
+export const getDictionaries = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase(baseURL);
+
+    if (!db) {
+      res
+        .status(404)
+        .json({ message: "Brakuje listy słowników w bazie danych!" });
+      return;
+    }
+
+    const skip: number = parseInt(req.query.skip as string, 10) || 0;
+    const take: number = parseInt(req.query.take as string, 10) || 10;
+
+    // Ensure query parameters are parsed as strings and convert them
+    const filters = parseQueryFilterArray(req.query.filters || []);
+    const sortings = parseQuerySortingArray(req.query.sortings || []);
+
+    const filterQuery = buildFilterQuery(filters);
+
+    const sortObject = buildSortObject(sortings);
+
+    const collection = db.collection<DictionaryProps>("list");
+
+    const dictionaries = await collection
+      .find(filterQuery)
+      .sort(sortObject)
+      .skip(skip)
+      .limit(take)
+      .toArray();
+
+    res
+      .status(200)
+      .json({ items: dictionaries, totalItems: dictionaries.length });
+  } catch (error) {
+    console.error("Błąd podczas pobierania listy słowników", error);
+    res.status(500).json({
+      message: commonMessages.databaseFailure,
+    });
+  }
+};
 
 export const getDistrictsDictionary = async (
   req: Request,
