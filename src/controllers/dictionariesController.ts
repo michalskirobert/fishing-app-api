@@ -63,6 +63,52 @@ export const getDictionaries = async (
   }
 };
 
+export const getDictionary = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = await connectDatabase(baseURL);
+
+    if (!db) {
+      res.status(404).json({ message: commonMessages.databaseFailure });
+      return;
+    }
+
+    const { id } = req.params;
+
+    // Find the document by id in the specified collection
+    const dictionaryCollection = db.collection<DictionaryProps>("list");
+
+    const foundDictionary = await dictionaryCollection.findOne({
+      _id: new ObjectId(id),
+    });
+
+    if (!foundDictionary) {
+      res
+        .status(404)
+        .json({ message: `Brakuje słownika o identyfikatorze ${id}` });
+      return;
+    }
+
+    const foundChildrens = await db
+      .collection<DictionaryProps>(foundDictionary.group)
+      .find()
+      .toArray();
+
+    const dictionary: DictionaryProps = {
+      ...foundDictionary,
+      subItems: foundChildrens,
+    };
+
+    res.status(200).json(dictionary);
+  } catch (error) {
+    res.status(500).json({
+      message: commonMessages.commonServerError,
+    });
+  }
+};
+
 export const getDistrictsDictionary = async (
   req: Request,
   res: Response

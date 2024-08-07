@@ -1,3 +1,5 @@
+import { WithId } from "mongodb";
+
 export type ClubProps = {
   name: string;
   districtName: string;
@@ -18,4 +20,6 @@ export type DictionaryProps = {
   createdDate: Date | null;
   language: "pl" | "en" | "uk" | "rus";
   isActive: boolean;
+  group: string;
+  subItems?: WithId<DictionaryProps>[];
 };

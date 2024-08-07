@@ -9,11 +9,13 @@ import {
   updateSpotTypeDictionary,
   getSpotTypeDictionary,
   getDictionaries,
+  getDictionary,
 } from "@controllers/dictionariesController";
 
 const router = express.Router();
 
 router.get("/", getDictionaries);
+router.get("/:id", getDictionary);
 
 router.get("/districts", getDistrictsDictionary);
 router.get("/districts/:id", getDistrictDictionary);
